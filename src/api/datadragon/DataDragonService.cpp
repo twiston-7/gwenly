@@ -3,8 +3,9 @@
 #include <nlohmann/json.hpp>
 
 #include "data/Constants.h"
+#include "data/SummonerSpellInfo.h"
 
-std::wstring to_wstring(const std::string& str)
+static std::wstring to_wstring(const std::string& str)
 {
     if (str.empty()) return L"";
 
@@ -25,12 +26,67 @@ std::wstring to_wstring(const std::string& str)
     return result;
 }
 
+std::vector<SummonerSpellInfo> DataDragonService::GetSummonerSpellData() {
+    const std::string response = BasicRequest::SendBasicRequest(
+        Constants::HTTP_GET,
+        Constants::BuildLeagueSummonerDataApiEndpoint(GetLatestLeagueVersion(), Constants::LOCALE),
+        GetDataDragonConnection(),
+        false
+    );
+
+    auto jsonData = nlohmann::json::parse(response);
+
+    auto spellMap = jsonData["data"].get<std::unordered_map<std::string, SummonerSpellInfo>>();
+    static std::vector<SummonerSpellInfo> result = [spellMap] {
+        std::vector<SummonerSpellInfo> returnVector;
+        returnVector.reserve(spellMap.size());
+
+        std::transform(spellMap.begin(), spellMap.end(), std::back_inserter(returnVector),
+            [](const auto& pair) { return pair.second; });
+        return returnVector;
+    }();
+
+    return result;
+}
+
+std::string DataDragonService::SummonerSpellDisplayNameToId(const std::string &displayName) {
+    auto summonerSpellInfo = GetSummonerSpellData();
+    static auto lookupMap = [summonerSpellInfo] {
+        auto returnMap = std::unordered_map<std::string, std::string>();
+        for (auto& spell : summonerSpellInfo) {
+            returnMap[spell.name] = spell.id;
+        }
+
+        return returnMap;
+    }();
+
+    return lookupMap[displayName];
+}
+
+std::unordered_map<std::string, unsigned int> DataDragonService::GetCooldownMap() {
+    auto summonerSpellInfo = GetSummonerSpellData();
+
+    static std::unordered_map<std::string, unsigned int> cooldownMap = [summonerSpellInfo] {
+        auto returnMap = std::unordered_map<std::string, unsigned int>();
+
+        for (auto& spell : summonerSpellInfo) {
+            auto const cooldown = static_cast<unsigned int>(std::stoul(spell.cooldownBurn));
+
+            returnMap[spell.name] = cooldown;
+        }
+
+        return returnMap;
+    }();
+
+    return cooldownMap;
+}
+
 std::wstring DataDragonService::GetLatestLeagueVersion() {
     static auto leagueVersion = [] {
             const std::string response = BasicRequest::SendBasicRequest(
                 Constants::HTTP_GET,
                 Constants::LEAGUE_VERSIONS_API_ENDPOINT,
-                GetConnection(),
+                GetDataDragonConnection(),
                 false
             );
 
@@ -45,3 +101,12 @@ unsigned int DataDragonService::GetCooldownForSummonerSpell(const std::string &d
     return GetCooldownMap().at(displayName);
 }
 
+std::string DataDragonService::GetSummonerSpellImageBytes(const std::string &displayName) {
+    std::string id = SummonerSpellDisplayNameToId(displayName);
+    return BasicRequest::SendBasicRequest(
+        Constants::HTTP_GET,
+        Constants::BuildLeagueSummonerSpellImageApiEndpoint(GetLatestLeagueVersion(), to_wstring(id)),
+        GetDataDragonConnection(),
+        false
+    );
+}

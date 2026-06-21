@@ -10,32 +10,9 @@
 #include "setup/D3D11Device.h"
 #include "setup/Window.h"
 #include "ui/ImGuiManager.h"
+#include "ui/TextureManager.h"
 
 void Application::run() {
-    std::wstring versionString = L"Latest League of Legends version: " +
-        DataDragonService::GetLatestLeagueVersion()
-        + L"\n-------------------------\n";
-
-    OutputDebugStringW(
-        versionString.c_str()
-    );
-
-    SummonerTimerInfo::Fetch();
-    if (SummonerTimerInfo::enemySummonerData) {
-        for (const auto& summonerData : SummonerTimerInfo::enemySummonerData.value()) {
-            const auto cooldownSpellOne = DataDragonService::GetCooldownForSummonerSpell(summonerData.summonerSpellOne.displayName);
-            const auto cooldownSpellTwo = DataDragonService::GetCooldownForSummonerSpell(summonerData.summonerSpellTwo.displayName);
-
-            std::string debugString = "Champion: " + summonerData.championName +
-                        "\nSummoner spell 1: " + summonerData.summonerSpellOne.displayName + " -- Cooldown: " + std::to_string(cooldownSpellOne) +
-                        "\nSummoner spell 2: " + summonerData.summonerSpellTwo.displayName + " -- Cooldown: " + std::to_string(cooldownSpellTwo) +"\n";
-
-            OutputDebugStringA(
-                debugString.c_str()
-            );
-        }
-    }
-
     if (!Window::CreateOverlayWindow())
         exit(1);
 
@@ -44,6 +21,41 @@ void Application::run() {
     D3D11Device::CreateDeviceD3D(hwnd);
 
     ImGuiManager::SetupImGui(hwnd);
+
+    std::wstring versionString = L"Latest League of Legends version: " +
+    DataDragonService::GetLatestLeagueVersion()
+    + L"\n-------------------------\n";
+
+    OutputDebugStringW(
+        versionString.c_str()
+    );
+
+    SummonerTimerInfo::Fetch();
+    if (SummonerTimerInfo::enemySummonerData) {
+        for (const auto& summonerData : SummonerTimerInfo::enemySummonerData.value()) {
+            std::string imageBytes = DataDragonService::GetSummonerSpellImageBytes(summonerData.summonerSpellOne.displayName);
+            bool loaded = TextureManager::LoadFromMemory(
+                summonerData.summonerSpellTwo.displayName,
+                reinterpret_cast<const unsigned char*>(imageBytes.data()),
+                imageBytes.size()
+            );
+
+            if (!loaded) {
+                OutputDebugStringW(L"Failed to load texture from memory.\n");
+            }
+
+            imageBytes = DataDragonService::GetSummonerSpellImageBytes(summonerData.summonerSpellTwo.displayName);
+            loaded = TextureManager::LoadFromMemory(
+                summonerData.summonerSpellTwo.displayName,
+                reinterpret_cast<const unsigned char*>(imageBytes.data()),
+                imageBytes.size()
+            );
+
+            if (!loaded) {
+                OutputDebugStringW(L"Failed to load texture from memory.\n");
+            }
+        }
+    }
 
     MSG msg = {};
 

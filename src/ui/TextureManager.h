@@ -2,6 +2,7 @@
 #define GWENLY_TEXTUREMANAGER_H
 
 #include <d3d11.h>
+#include <imgui.h>
 #include <string>
 #include <unordered_map>
 
@@ -29,7 +30,7 @@ class TextureManager {
 public:
     static bool LoadFromMemory(const std::string& key, const unsigned char* data, size_t dataSize);
 
-    static ID3D11ShaderResourceView* Get(const std::string& key);
+    static ImTextureID Get(const std::string &key);
 
     static void ReleaseAll();
 };

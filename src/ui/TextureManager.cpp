@@ -1,6 +1,7 @@
 #include "TextureManager.h"
 
 #define STB_IMAGE_IMPLEMENTATION
+#include <imgui.h>
 #include <stb_image.h>
 #include "setup/D3D11Device.h"
 
@@ -26,7 +27,9 @@ bool TextureManager::LoadFromMemory(const std::string &key, const unsigned char 
     subResource.SysMemPitch = width * DEFAULT_CHANNEL_COUNT;
 
     ID3D11Texture2D* texture = nullptr;
-    if (!D3D11Device::g_pd3dDevice->CreateTexture2D(&desc, &subResource, &texture)) {
+    HRESULT hr = D3D11Device::g_pd3dDevice->CreateTexture2D(&desc, &subResource, &texture);
+    if (FAILED(hr)) {
+        stbi_image_free(pixels);
         return false;
     }
 
@@ -36,7 +39,10 @@ bool TextureManager::LoadFromMemory(const std::string &key, const unsigned char 
     srvDesc.Texture2D.MipLevels = desc.MipLevels;
 
     ID3D11ShaderResourceView* shaderResourceView = nullptr;
-    if (!D3D11Device::g_pd3dDevice->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView)) {
+    hr = D3D11Device::g_pd3dDevice->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
+    if (FAILED(hr)) {
+        texture->Release();
+        stbi_image_free(pixels);
         return false;
     }
 
@@ -48,8 +54,8 @@ bool TextureManager::LoadFromMemory(const std::string &key, const unsigned char 
     return true;
 }
 
-ID3D11ShaderResourceView * TextureManager::Get(const std::string &key) {
-    return textures[key];
+ImTextureID TextureManager::Get(const std::string &key) {
+    return reinterpret_cast<ImTextureID>(textures[key]);
 }
 
 void TextureManager::ReleaseAll() {

@@ -39,6 +39,8 @@ add_executable(Gwenly WIN32
         src/render/SummonerSpellTrackerFrame.h
         src/ui/TextureManager.cpp
         src/ui/TextureManager.h
+        src/api/datadragon/data/SummonerSpellInfo.h
+        src/api/datadragon/data/SummonerSpellInfo.h
 )
 
 target_compile_definitions(Gwenly PRIVATE UNICODE _UNICODE)

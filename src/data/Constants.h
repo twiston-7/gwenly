@@ -26,10 +26,14 @@ struct Constants {
         const std::wstring& version,
         const std::wstring& locale
     ) {
-        static auto summonerDataEndpoint =
-            L"/cdn/" + version + L"/data/" + locale + L"/" + L"/summoner.json";
+        return L"/cdn/" + version + L"/data/" + locale + L"/summoner.json";;
+    }
 
-        return summonerDataEndpoint;
+    static std::wstring BuildLeagueSummonerSpellImageApiEndpoint(
+        const std::wstring& version,
+        const std::wstring& summonerSpellId
+    ) {
+        return L"/cdn/" + version + L"/img/spell/" + summonerSpellId + L".png";
     }
 
     // Ports

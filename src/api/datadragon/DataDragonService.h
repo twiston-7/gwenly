@@ -1,5 +1,6 @@
 #ifndef GWENLY_DATADRAGONSERVICE_H
 #define GWENLY_DATADRAGONSERVICE_H
+#include <complex.h>
 #include <string>
 #include <windows.h>
 #include <winhttp.h>
@@ -7,37 +8,14 @@
 
 #include "data/Constants.h"
 #include "api/BasicRequest.h"
+#include "data/SummonerSpellInfo.h"
 
 class DataDragonService {
-    static std::unordered_map<std::string, unsigned int> GetCooldownMap() {
-        static std::unordered_map<std::string, unsigned int> cooldownMap = [] {
-            const std::string response = BasicRequest::SendBasicRequest(
-                Constants::HTTP_GET,
-                Constants::BuildLeagueSummonerDataApiEndpoint(GetLatestLeagueVersion(), Constants::LOCALE),
-                GetConnection(),
-                false
-            );
+    [[nodiscard]] static std::unordered_map<std::string, unsigned int> GetCooldownMap();
+    [[nodiscard]] static std::vector<SummonerSpellInfo> GetSummonerSpellData();
+    [[nodiscard]] static std::string SummonerSpellDisplayNameToId(const std::string &displayName);
 
-            auto jsonData = nlohmann::json::parse(response);
-
-            const nlohmann::json& spells = jsonData["data"];
-
-            auto returnMap = std::unordered_map<std::string, unsigned int>();
-
-            for (auto& [key, spell] : spells.items()) {
-                auto name = spell["name"].get<std::string>();
-                auto cooldownString = spell["cooldownBurn"].get<std::string>();
-                auto const cooldown = static_cast<unsigned int>(std::stoul(cooldownString));
-
-                returnMap[name] = cooldown;
-            }
-
-            return returnMap;
-        }();
-        return cooldownMap;
-    }
-
-    static HINTERNET GetConnection() {
+    static HINTERNET GetDataDragonConnection() {
         static HINTERNET dataDragonConnection = WinHttpConnect(
             BasicRequest::GetSession(),
             Constants::DATA_DRAGON_API_URL,
@@ -47,8 +25,10 @@ class DataDragonService {
         return dataDragonConnection;
     }
 public:
-    static std::wstring GetLatestLeagueVersion();
-    static unsigned int GetCooldownForSummonerSpell(const std::string &displayName);
+    [[nodiscard]] static std::wstring GetLatestLeagueVersion();
+    [[nodiscard]] static unsigned int GetCooldownForSummonerSpell(const std::string &displayName);
+
+    [[nodiscard]] static std::string GetSummonerSpellImageBytes(const std::string &displayName);
 };
 
 
