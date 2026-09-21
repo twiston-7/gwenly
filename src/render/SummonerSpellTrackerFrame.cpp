@@ -47,9 +47,5 @@ void SummonerSpellTrackerFrame::Render() {
         }
     }
 
-
-    // ImGui::SetWindowFontScale(2.0f);
-    // ImGui::TextColored(ImVec4(1, 1, 1, 1), "Hello, jungle!");
-
     ImGui::End();
 }

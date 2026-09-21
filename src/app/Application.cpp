@@ -35,7 +35,7 @@ void Application::run() {
         for (const auto& summonerData : SummonerTimerInfo::enemySummonerData.value()) {
             std::string imageBytes = DataDragonService::GetSummonerSpellImageBytes(summonerData.summonerSpellOne.displayName);
             bool loaded = TextureManager::LoadFromMemory(
-                summonerData.summonerSpellTwo.displayName,
+                summonerData.summonerSpellOne.displayName,
                 reinterpret_cast<const unsigned char*>(imageBytes.data()),
                 imageBytes.size()
             );

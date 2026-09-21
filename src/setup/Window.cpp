@@ -52,7 +52,7 @@ bool Window::CreateOverlayWindow()
     g_hWnd = CreateWindowEx(
         WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TOOLWINDOW,
         WINDOW_CLASS_NAME,
-        _T("Jungle Overlay"),
+        _T("Gwenly"),
         WS_POPUP,
         0, 0, screenWidth, screenHeight,
         nullptr, nullptr,
