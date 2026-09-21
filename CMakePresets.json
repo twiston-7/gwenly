@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/cmake-build-debug",
+      "toolchainFile": "$env{USERPROFILE}/.vcpkg-clion/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "VCPKG_TARGET_TRIPLET": "x64-windows" }
+    }
+  ],
+  "buildPresets": [{ "name": "debug", "configurePreset": "debug" }]
+}
