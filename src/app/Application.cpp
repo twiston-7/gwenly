@@ -33,7 +33,7 @@ void Application::run() {
     SummonerTimerInfo::Fetch();
     if (SummonerTimerInfo::enemySummonerData) {
         for (const auto& summonerData : SummonerTimerInfo::enemySummonerData.value()) {
-            std::string imageBytes = DataDragonService::GetSummonerSpellImageBytes(summonerData.summonerSpellOne.displayName);
+            std::string imageBytes = DataDragonService::GetSummonerSpellImageBytes(summonerData.summonerSpellOne.id);
             bool loaded = TextureManager::LoadFromMemory(
                 summonerData.summonerSpellOne.displayName,
                 reinterpret_cast<const unsigned char*>(imageBytes.data()),
@@ -44,7 +44,7 @@ void Application::run() {
                 OutputDebugStringW(L"Failed to load texture from memory.\n");
             }
 
-            imageBytes = DataDragonService::GetSummonerSpellImageBytes(summonerData.summonerSpellTwo.displayName);
+            imageBytes = DataDragonService::GetSummonerSpellImageBytes(summonerData.summonerSpellTwo.id);
             loaded = TextureManager::LoadFromMemory(
                 summonerData.summonerSpellTwo.displayName,
                 reinterpret_cast<const unsigned char*>(imageBytes.data()),

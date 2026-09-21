@@ -21,6 +21,7 @@ struct Constants {
     static constexpr LPCWSTR LEAGUE_VERSIONS_API_ENDPOINT = L"/api/versions.json";
     static constexpr LPCWSTR LEAGUE_ACTIVE_PLAYER_NAME_API_ENDPOINT = L"/liveclientdata/activeplayername";
     static constexpr LPCWSTR LEAGUE_PLAYERLIST_API_ENDPOINT = L"/liveclientdata/playerlist";
+    static constexpr LPCWSTR LEAGUE_GAMESTATS_API_ENDPOINT = L"/liveclientdata/gamestats";
 
     static std::wstring BuildLeagueSummonerDataApiEndpoint(
         const std::wstring& version,

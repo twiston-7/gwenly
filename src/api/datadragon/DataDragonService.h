@@ -13,7 +13,6 @@
 class DataDragonService {
     [[nodiscard]] static std::unordered_map<std::string, unsigned int> GetCooldownMap();
     [[nodiscard]] static std::vector<SummonerSpellInfo> GetSummonerSpellData();
-    [[nodiscard]] static std::string SummonerSpellDisplayNameToId(const std::string &displayName);
 
     static HINTERNET GetDataDragonConnection() {
         static HINTERNET dataDragonConnection = WinHttpConnect(
@@ -27,8 +26,9 @@ class DataDragonService {
 public:
     [[nodiscard]] static std::wstring GetLatestLeagueVersion();
     [[nodiscard]] static unsigned int GetCooldownForSummonerSpell(const std::string &displayName);
+    [[nodiscard]] static std::string SummonerSpellDisplayNameToId(const std::string &displayName, const std::string &gameMode);
 
-    [[nodiscard]] static std::string GetSummonerSpellImageBytes(const std::string &displayName);
+    [[nodiscard]] static std::string GetSummonerSpellImageBytes(const std::string &id);
 };
 
 

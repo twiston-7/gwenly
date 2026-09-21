@@ -84,6 +84,14 @@ bool SummonerTimerInfo::Fetch() {
         return false;
     }
 
+    const std::string gameStatsResponse =
+        LeagueGameClientApi::SendRequest(Constants::HTTP_GET, Constants::LEAGUE_GAMESTATS_API_ENDPOINT);
+    if (gameStatsResponse.empty()) {
+        OutputDebugStringA("Could not fetch gamestats. Is the game running?\n");
+        return false;
+    }
+    const auto gameMode = nlohmann::json::parse(gameStatsResponse).at("gameMode").get<std::string>();
+
     enemySummonerData.emplace();
 
     for (const auto &player : enemyPlayers.value()) {
@@ -91,10 +99,12 @@ bool SummonerTimerInfo::Fetch() {
             player.championName,
             SummonerSpellData(
                 player.summonerSpells.summonerSpellOne.displayName,
+                DataDragonService::SummonerSpellDisplayNameToId(player.summonerSpells.summonerSpellOne.displayName, gameMode),
                 DataDragonService::GetCooldownForSummonerSpell(player.summonerSpells.summonerSpellOne.displayName)
             ),
             SummonerSpellData(
                 player.summonerSpells.summonerSpellTwo.displayName,
+                DataDragonService::SummonerSpellDisplayNameToId(player.summonerSpells.summonerSpellTwo.displayName, gameMode),
                 DataDragonService::GetCooldownForSummonerSpell(player.summonerSpells.summonerSpellTwo.displayName)
             )
         };

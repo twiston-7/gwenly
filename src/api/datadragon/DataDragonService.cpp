@@ -49,18 +49,27 @@ std::vector<SummonerSpellInfo> DataDragonService::GetSummonerSpellData() {
     return result;
 }
 
-std::string DataDragonService::SummonerSpellDisplayNameToId(const std::string &displayName) {
-    auto summonerSpellInfo = GetSummonerSpellData();
-    static auto lookupMap = [summonerSpellInfo] {
-        auto returnMap = std::unordered_map<std::string, std::string>();
-        for (auto& spell : summonerSpellInfo) {
-            returnMap[spell.name] = spell.id;
-        }
+std::string DataDragonService::SummonerSpellDisplayNameToId(const std::string &displayName, const std::string &gameMode) {
+    const bool wantJade = gameMode.find("JADE") != std::string::npos;
+    OutputDebugStringW((L"wantJade?: " + std::to_wstring(wantJade) + L"\n").c_str());
 
-        return returnMap;
-    }();
+    const auto summonerSpellInfo = GetSummonerSpellData();
+    std::vector<const SummonerSpellInfo *> matches;
 
-    return lookupMap[displayName];
+    for (auto& spell : summonerSpellInfo) {
+        if (spell.name == displayName) { matches.push_back(&spell); }
+    }
+
+    OutputDebugStringW((L"Found " + std::to_wstring(matches.size()) + L" matches for " + to_wstring(displayName) + L"\n").c_str());
+
+    if (matches.empty()) { return ""; }
+    if (matches.size() == 1) { return matches.front()->id; }
+
+    for (auto* spell : matches) {
+        if (spell->id.find("Jade") != std::string::npos == wantJade) { return spell->id; }
+    }
+
+    return matches.front()->id;
 }
 
 std::unordered_map<std::string, unsigned int> DataDragonService::GetCooldownMap() {
@@ -101,8 +110,7 @@ unsigned int DataDragonService::GetCooldownForSummonerSpell(const std::string &d
     return GetCooldownMap().at(displayName);
 }
 
-std::string DataDragonService::GetSummonerSpellImageBytes(const std::string &displayName) {
-    std::string id = SummonerSpellDisplayNameToId(displayName);
+std::string DataDragonService::GetSummonerSpellImageBytes(const std::string &id) {
     return BasicRequest::SendBasicRequest(
         Constants::HTTP_GET,
         Constants::BuildLeagueSummonerSpellImageApiEndpoint(GetLatestLeagueVersion(), to_wstring(id)),
